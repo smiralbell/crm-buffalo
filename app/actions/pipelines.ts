@@ -336,8 +336,9 @@ export async function moveLead(
 
     const oldStageId = lead.pipeline_stage_id
     const newStageId = pipelineStageId
+    const currentPosition = lead.position ?? 0
 
-    if (oldStageId === newStageId && lead.position === position) {
+    if (oldStageId === newStageId && currentPosition === position) {
       return { success: true }
     }
 
@@ -346,7 +347,7 @@ export async function moveLead(
         UPDATE leads
         SET position = position - 1
         WHERE pipeline_stage_id = ${oldStageId}
-        AND position > ${lead.position}
+        AND position > ${currentPosition}
       `
     }
 
@@ -358,21 +359,21 @@ export async function moveLead(
         AND position >= ${position}
       `
     } else if (newStageId && oldStageId === newStageId) {
-      if (lead.position < position) {
+      if (currentPosition < position) {
         await prisma.$executeRaw`
           UPDATE leads
           SET position = position - 1
           WHERE pipeline_stage_id = ${newStageId}
-          AND position > ${lead.position}
+          AND position > ${currentPosition}
           AND position <= ${position}
         `
-      } else if (lead.position > position) {
+      } else if (currentPosition > position) {
         await prisma.$executeRaw`
           UPDATE leads
           SET position = position + 1
           WHERE pipeline_stage_id = ${newStageId}
           AND position >= ${position}
-          AND position < ${lead.position}
+          AND position < ${currentPosition}
         `
       }
     }

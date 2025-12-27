@@ -7,6 +7,12 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const isLoginPage = pathname === '/login'
   const isAppRoute = pathname.startsWith('/app')
+  const isRoot = pathname === '/'
+
+  // Don't redirect root path here - let app/page.tsx handle it
+  if (isRoot) {
+    return NextResponse.next()
+  }
 
   if (isLoginPage && isAuthenticated) {
     const url = new URL('/app/dashboard', request.url)

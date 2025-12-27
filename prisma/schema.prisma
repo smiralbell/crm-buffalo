@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contact {
+  id              Int       @id @default(autoincrement())
+  nombre          String?
+  email           String    @unique
+  instagram_user  String?   @unique
+  telefono        String?
+  empresa         String?
+  direccion_fiscal String?
+  ciudad          String?
+  codigo_postal   String?
+  pais            String?
+  cif             String?
+  dni             String?
+  iban            String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  leads     Lead[]
+  messages  Message[]
+  tasks     Task[]
+
+  @@map("contacts")
+}
+
+model Lead {
+  id                 Int       @id @default(autoincrement())
+  contact_id         Int       @unique
+  estado             String    @default("frio")
+  origen_principal   String?
+  prioridad          String    @default("media")
+  score              Int?
+  ultima_interaccion DateTime?
+  pipeline_id        Int?
+  pipeline_stage_id  Int?
+  position           Int?
+  valor              Float?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  contact        Contact        @relation(fields: [contact_id], references: [id], onDelete: Cascade)
+  pipeline        Pipeline?      @relation(fields: [pipeline_id], references: [id], onDelete: SetNull)
+  pipeline_stage  PipelineStage? @relation(fields: [pipeline_stage_id], references: [id], onDelete: SetNull)
+  messages        Message[]
+  tasks           Task[]
+
+  @@map("leads")
+}
+
+model Pipeline {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  stages PipelineStage[]
+  leads  Lead[]
+
+  @@map("pipelines")
+}
+
+model PipelineStage {
+  id          Int       @id @default(autoincrement())
+  pipeline_id Int
+  nombre      String
+  position    Int
+  color       String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  pipeline Pipeline @relation(fields: [pipeline_id], references: [id], onDelete: Cascade)
+  leads    Lead[]
+
+  @@map("pipeline_stages")
+}
+
+model Message {
+  id          Int       @id @default(autoincrement())
+  contact_id  Int
+  lead_id     Int?
+  canal       String?
+  direccion   String?
+  contenido   String?
+  timestamp   DateTime  @default(now())
+  raw_payload Json?
+
+  contact Contact @relation(fields: [contact_id], references: [id], onDelete: Cascade)
+  lead    Lead?   @relation(fields: [lead_id], references: [id], onDelete: SetNull)
+
+  @@map("messages")
+}
+
+model Task {
+  id         Int       @id @default(autoincrement())
+  lead_id    Int?
+  contact_id Int?
+  tarea      String
+  pendiente  Boolean   @default(true)
+  fecha      DateTime?
+
+  lead    Lead?    @relation(fields: [lead_id], references: [id], onDelete: SetNull)
+  contact Contact? @relation(fields: [contact_id], references: [id], onDelete: SetNull)
+
+  @@map("tasks")
+}
+

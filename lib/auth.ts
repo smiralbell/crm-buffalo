@@ -12,6 +12,7 @@ export async function createSession() {
     sameSite: 'lax',
     maxAge: SESSION_MAX_AGE,
     path: '/',
+    domain: undefined, // Let browser determine domain automatically
   })
 }
 

@@ -6,13 +6,13 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
 export async function createSession() {
   const cookieStore = await cookies()
+  const isProduction = process.env.NODE_ENV === 'production'
   cookieStore.set(SESSION_COOKIE_NAME, 'authenticated', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction,
     sameSite: 'lax',
     maxAge: SESSION_MAX_AGE,
     path: '/',
-    domain: undefined, // Let browser determine domain automatically
   })
 }
 

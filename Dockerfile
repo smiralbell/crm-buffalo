@@ -35,8 +35,13 @@ RUN apk add --no-cache libc6-compat openssl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copy standalone output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Copy static files (includes CSS)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy public folder if it exists (for assets)
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public 2>/dev/null || true
+# Copy Prisma files
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
@@ -50,4 +55,3 @@ ENV PORT=80
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
-

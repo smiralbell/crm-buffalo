@@ -37,12 +37,18 @@ export async function middleware(request: NextRequest) {
     console.log('[MIDDLEWARE] ❌ NOT AUTHENTICATED - Redirecting to /login')
     const redirectUrl = new URL('/login', request.url)
     console.log('[MIDDLEWARE] Redirect URL:', redirectUrl.toString())
-    return NextResponse.redirect(redirectUrl)
+    const response = NextResponse.redirect(redirectUrl)
+    // Set pathname header for layouts to use
+    response.headers.set('x-pathname', '/login')
+    return response
   }
   
   // If authenticated, allow request
   console.log('[MIDDLEWARE] ✅ AUTHENTICATED - Allowing request to proceed')
   const response = NextResponse.next()
+  // CRITICAL: Set pathname header so AppLayout can verify route
+  response.headers.set('x-pathname', pathname)
+  console.log('[MIDDLEWARE] Set x-pathname header:', pathname)
   console.log('[MIDDLEWARE] Response status:', response.status)
   console.log('[MIDDLEWARE] ===== END REQUEST =====')
   console.log('========================================')

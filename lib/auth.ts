@@ -6,14 +6,16 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
 export async function createSession() {
   const cookieStore = await cookies()
-  // Behind EasyPanel proxy: proxy terminates HTTPS, sends HTTP to container
-  // Cookies need to work with the proxy's HTTPS context
-  // Use secure: true in production (proxy ensures HTTPS to browser)
+  // EasyPanel: HTTPS externally (proxy), HTTP internally (container)
+  // For cookies to work behind proxy, we need secure: true when browser sees HTTPS
+  // However, if there are issues, we can try secure: false temporarily
+  // Try secure: true first (should work with EasyPanel's HTTPS proxy)
   const isProduction = process.env.NODE_ENV === 'production'
+  
   cookieStore.set(SESSION_COOKIE_NAME, 'authenticated', {
     httpOnly: true,
-    secure: isProduction, // Proxy ensures HTTPS to browser
-    sameSite: 'lax', // Works with redirects
+    secure: isProduction, // EasyPanel proxy provides HTTPS to browser
+    sameSite: 'lax', // Allows redirects
     maxAge: SESSION_MAX_AGE,
     path: '/',
   })

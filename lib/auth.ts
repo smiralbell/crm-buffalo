@@ -61,7 +61,7 @@ export async function requireAuth() {
   const isAuthenticated = await getSession()
   if (!isAuthenticated) {
     console.log('[AUTH] Not authenticated, redirecting to /login')
-    // Use absolute redirect to prevent loops
+    // Throw redirect to prevent further execution
     redirect('/login')
   }
   console.log('[AUTH] Authentication check passed')

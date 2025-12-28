@@ -49,7 +49,12 @@ export async function middleware(request: NextRequest) {
 
   // For root path and other paths, let Next.js handle them
   console.log('[MIDDLEWARE] Allowing request to proceed:', pathname)
-  return NextResponse.next()
+  
+  // Add pathname to headers so layouts can access it if needed
+  const response = NextResponse.next()
+  response.headers.set('x-pathname', pathname)
+  
+  return response
 }
 
 export const config = {

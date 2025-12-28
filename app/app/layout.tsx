@@ -8,9 +8,14 @@ export default function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  // This layout is ONLY for /app/* routes
-  // Middleware already ensures authentication
-  // No auth logic here - just render the layout
+  console.log('========================================')
+  console.log('[APP_LAYOUT] ===== AppLayout rendering =====')
+  console.log('[APP_LAYOUT] Timestamp:', new Date().toISOString())
+  console.log('[APP_LAYOUT] This layout is ONLY for /app/* routes')
+  console.log('[APP_LAYOUT] Middleware already ensures authentication')
+  console.log('[APP_LAYOUT] Rendering layout with Sidebar and children')
+  console.log('========================================')
+  
   return (
     <div className="flex h-screen">
       <Sidebar />

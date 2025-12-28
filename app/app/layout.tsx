@@ -1,6 +1,7 @@
 import React from 'react'
 import { Sidebar } from '@/components/sidebar'
 
+// Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
 export default function AppLayout({
@@ -8,17 +9,11 @@ export default function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  console.log('========================================')
-  console.log('[APP_LAYOUT] ===== AppLayout rendering =====')
-  console.log('[APP_LAYOUT] Timestamp:', new Date().toISOString())
-  console.log('[APP_LAYOUT] This layout is for /app/* routes')
-  console.log('[APP_LAYOUT] Middleware ensures authentication')
-  console.log('[APP_LAYOUT] Rendering layout with Sidebar')
-  console.log('========================================')
+  // This layout is ONLY for /app/* routes
+  // In Next.js App Router, layouts in app/app/ should only apply to /app/* routes
+  // If it's being applied elsewhere, that's a Next.js bug, but we log it
+  console.log('[APP_LAYOUT] Rendering AppLayout for /app/* route')
   
-  // Pure layout - no routing logic, no auth checks, no pathname inspection
-  // Middleware handles route protection
-  // This layout only renders UI structure
   return (
     <div className="flex h-screen">
       <Sidebar />

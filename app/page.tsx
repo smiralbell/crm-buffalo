@@ -1,17 +1,16 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { getSession } from '@/lib/auth'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+// Force dynamic to prevent static generation
+export const dynamic = 'force-dynamic'
 
-export default function HomePage() {
-  const router = useRouter()
+export default async function HomePage() {
+  // Simple server-side redirect - no client component needed
+  const isAuthenticated = await getSession()
   
-  useEffect(() => {
-    // Simple client-side redirect to login
-    // Middleware handles auth protection for /app/* routes
-    router.replace('/login')
-  }, [router])
-  
-  // Return null while redirecting
-  return null
+  if (isAuthenticated) {
+    redirect('/app/dashboard')
+  } else {
+    redirect('/login')
+  }
 }

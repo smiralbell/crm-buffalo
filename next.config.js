@@ -2,13 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  // Enable detailed logging
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
-  // Ensure CSS is properly handled in standalone mode
+  // Disable experimental features that might cause issues
   experimental: {
     outputFileTracingIncludes: {
       '/': ['./app/globals.css'],

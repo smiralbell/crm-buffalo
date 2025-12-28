@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 
+// Force dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   console.log('[ROOT] HomePage component rendering')
   try {

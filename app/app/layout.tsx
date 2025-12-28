@@ -7,6 +7,8 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode
 }) {
+  // This will redirect to /login if not authenticated
+  // The middleware also protects /app routes, so this is a double check
   await requireAuth()
 
   return (

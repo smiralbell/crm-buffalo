@@ -8,35 +8,62 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  // CRITICAL FIX: Check if we're actually on an /app/* route
-  // This layout should ONLY apply to /app/* routes, but Next.js seems to be applying it incorrectly
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || ''
+  // CRITICAL FIX: Multiple verification methods to ensure we're on /app/* route
+  // Next.js is incorrectly applying this layout to /login and other routes
+  let pathname = ''
+  
+  try {
+    const headersList = await headers()
+    pathname = headersList.get('x-pathname') || ''
+    
+    // Also try to get from referer as fallback
+    if (!pathname) {
+      const referer = headersList.get('referer') || ''
+      // Extract pathname from referer URL if available
+      try {
+        if (referer) {
+          const url = new URL(referer)
+          pathname = url.pathname
+        }
+      } catch {
+        // Ignore URL parsing errors
+      }
+    }
+  } catch (error) {
+    console.log('[APP_LAYOUT] Error reading headers:', error)
+  }
   
   console.log('[APP_LAYOUT] AppLayout rendering')
-  console.log('[APP_LAYOUT] Pathname from headers:', pathname)
+  console.log('[APP_LAYOUT] Pathname detected:', pathname || '(empty/unknown)')
   
-  // SAFETY CHECK: Only process if we're on an /app/* route
+  // STRICT CHECK: Only proceed if we're 100% certain we're on an /app/* route
   // If pathname is empty, undefined, or doesn't start with /app, return children immediately
-  const isAppRoute = pathname && pathname.startsWith('/app')
+  // This is CRITICAL to prevent redirect loops
+  const isDefinitelyAppRoute = pathname && pathname.startsWith('/app') && pathname.length > 4
   
-  if (!isAppRoute) {
-    console.log('[APP_LAYOUT] WARNING: Layout applied to non-/app route:', pathname || '(empty)')
-    console.log('[APP_LAYOUT] Returning children directly without any processing to prevent loop')
-    // Return children directly without ANY processing - no auth check, no layout wrapper
-    // This prevents the redirect loop when Next.js incorrectly applies this layout
+  if (!isDefinitelyAppRoute) {
+    console.log('[APP_LAYOUT] BLOCKED: Not a valid /app/* route. Pathname:', pathname || '(empty)')
+    console.log('[APP_LAYOUT] Returning children directly - NO auth check, NO layout wrapper')
+    // Return children directly without ANY processing
+    // This prevents redirect loops when Next.js incorrectly applies this layout
     return <>{children}</>
   }
   
-  console.log('[APP_LAYOUT] Confirmed /app route, proceeding with auth check')
+  console.log('[APP_LAYOUT] CONFIRMED: Valid /app/* route detected:', pathname)
+  console.log('[APP_LAYOUT] Proceeding with authentication check...')
   
-  // This layout is ONLY for /app/* routes
+  // Only execute auth check if we're 100% certain we're on an /app/* route
   // The middleware already protects /app routes and redirects to /login if not authenticated
   // So by the time we get here, the user should be authenticated
   // But we add an extra check just to be safe
-  console.log('[APP_LAYOUT] Calling requireAuth...')
-  await requireAuth()
-  console.log('[APP_LAYOUT] requireAuth passed, rendering layout')
+  try {
+    await requireAuth()
+    console.log('[APP_LAYOUT] Authentication check passed, rendering full layout')
+  } catch (error) {
+    console.error('[APP_LAYOUT] Authentication check failed:', error)
+    // If auth fails, return children without layout to prevent loop
+    return <>{children}</>
+  }
 
   return (
     <div className="flex h-screen">

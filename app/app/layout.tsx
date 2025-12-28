@@ -17,12 +17,22 @@ export default async function AppLayout({
   console.log('[APP_LAYOUT] Pathname from headers:', pathname)
   console.log('[APP_LAYOUT] This layout should ONLY be for /app/* routes')
   
-  // SAFETY CHECK: If we're not on an /app/* route, don't execute auth check
-  // This prevents the redirect loop when Next.js incorrectly applies this layout to /login
-  if (pathname && !pathname.startsWith('/app')) {
+  // SAFETY CHECK: If we're not on an /app/* route, return children immediately
+  // This prevents the redirect loop when Next.js incorrectly applies this layout to /login or /
+  // We check: if pathname exists AND it doesn't start with /app, then skip everything
+  const isAppRoute = pathname.startsWith('/app')
+  
+  if (pathname && !isAppRoute) {
     console.log('[APP_LAYOUT] WARNING: Layout applied to non-/app route:', pathname)
-    console.log('[APP_LAYOUT] Returning children without auth check to prevent loop')
-    // Return children directly without auth check to prevent redirect loop
+    console.log('[APP_LAYOUT] Returning children directly without any processing to prevent loop')
+    // Return children directly without ANY processing - no auth check, no layout wrapper
+    return <>{children}</>
+  }
+  
+  // Only execute auth check if we're actually on an /app/* route
+  // If pathname is empty or undefined, we also skip (shouldn't happen, but safety first)
+  if (!isAppRoute) {
+    console.log('[APP_LAYOUT] Pathname empty or not /app route, returning children directly')
     return <>{children}</>
   }
   
@@ -30,7 +40,7 @@ export default async function AppLayout({
   // The middleware already protects /app routes and redirects to /login if not authenticated
   // So by the time we get here, the user should be authenticated
   // But we add an extra check just to be safe
-  console.log('[APP_LAYOUT] Calling requireAuth...')
+  console.log('[APP_LAYOUT] Confirmed /app route, calling requireAuth...')
   await requireAuth()
   console.log('[APP_LAYOUT] requireAuth passed, rendering layout')
 
